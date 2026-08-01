@@ -37,8 +37,8 @@ Sentinel is built as a joint submission for two university electives:
 ### 1.4 References
 - `docs/THREAT_MODEL.md` (Day 15, not yet written)
 - `docs/CLOUD_ARCHITECTURE.md` (Day 19, not yet written)
-- `CLAUDE.md` (local, gitignored): day-by-day build plan and working conventions
-- `erd.mermaid`, `class-diagram.mermaid`, `component-diagram.mermaid`, `sequence-diagram.mermaid` (project root, local planning artifacts)
+- Project wiki, Architecture page: component, class, sequence, and data model diagrams
+- Project wiki, Build Plan page, and the GitHub Issues/Milestones boards: day-by-day build plan and tracking
 
 ## 2. Overall Description
 
@@ -60,7 +60,7 @@ Infra layer (independent of the above): Docker/Compose, GitHub Actions CI
 (build, test, SAST, dependency scanning), Terraform + k8s manifests
 (documentation grade), monitoring.
 ```
-Full diagram: `component-diagram.mermaid`.
+Full diagram: project wiki, Architecture page.
 
 ### 2.3 User Classes
 - **Registered user**: registers an account, adds websites they own or are authorized to assess, triggers scans, views findings/scores/history, downloads PDF reports.
@@ -82,9 +82,10 @@ Full diagram: `component-diagram.mermaid`.
 
 ## 3. Functional Requirements
 
-Each requirement is tagged with the plan day it's expected to land, per
-`CLAUDE.md`'s day-by-day build plan, so this doc and project status stay
-traceable to each other.
+Each requirement is tagged with the plan day it's expected to land. The
+build plan itself, and live status per day, is tracked in the project
+wiki's Build Plan page and in the corresponding GitHub issue, so this doc
+and project status stay traceable to each other.
 
 ### 3.1 Authentication & Accounts (Day 4)
 - **FR-1.1** A user can register with an email and password. Passwords are hashed with BCrypt before storage; plaintext passwords are never persisted or logged.
@@ -136,7 +137,7 @@ traceable to each other.
 
 ## 5. Data Model (summary)
 
-Full ERD: `erd.mermaid`. Entities: `User` (1 to many) `Website` (1 to many)
+Full ERD: project wiki, Architecture page. Entities: `User` (1 to many) `Website` (1 to many)
 `Scan` (1 to many) `Finding`; `Scan` (1 to 1) `Report`. These are
 implemented as JPA entities plus a Flyway migration on Day 2. This SRS is
 the source of truth for what each entity needs to support, so the schema
