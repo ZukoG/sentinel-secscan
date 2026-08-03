@@ -1,0 +1,38 @@
+# Local dev environment: Postgres + the Spring Boot app, wired together.
+# Defaults below need no .env file for `docker-compose up` to work out of
+# the box (see NFR-7 in docs/SRS.md). Override any of them by setting the
+# same-named variable in your shell, or copy infra/.env.example to
+# infra/.env with your own values.
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-sentinel}
+      POSTGRES_USER: ${POSTGRES_USER:-sentinel}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-sentinel}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-sentinel} -d ${POSTGRES_DB:-sentinel}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build:
+      context: ..
+      dockerfile: infra/docker/Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:-sentinel}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-sentinel}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-sentinel}
+    ports:
+      - "8080:8080"
+
+volumes:
+  postgres_data:
