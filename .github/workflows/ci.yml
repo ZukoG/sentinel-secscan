@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+
+    # The existing test loads the full Spring context, which needs a real
+    # database (no H2/Testcontainers in this project yet). Credentials
+    # below match the local-dev defaults already in application.properties,
+    # so no SPRING_DATASOURCE_* overrides are needed here.
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: sentinel
+          POSTGRES_USER: sentinel
+          POSTGRES_PASSWORD: sentinel
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U sentinel -d sentinel"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+
+      # Uses the repo's own wrapper, same Maven version as local dev and
+      # the Docker build (infra/docker/Dockerfile), nothing to keep in sync.
+      - name: Build
+        run: ./mvnw -B compile
+
+      - name: Run tests
+        run: ./mvnw -B test
