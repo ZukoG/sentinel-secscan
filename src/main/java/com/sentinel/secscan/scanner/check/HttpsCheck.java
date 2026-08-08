@@ -4,13 +4,12 @@ import com.sentinel.secscan.domain.Severity;
 import com.sentinel.secscan.domain.Website;
 import com.sentinel.secscan.scanner.CheckResult;
 import com.sentinel.secscan.scanner.ScanCheck;
+import com.sentinel.secscan.scanner.ScannerSupport;
 import org.springframework.stereotype.Component;
 
 import java.net.URI;
 import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.time.Duration;
 
 /**
  * Passive by design: sends the same plain GET a normal browser visit would
@@ -20,8 +19,6 @@ import java.time.Duration;
  */
 @Component
 public class HttpsCheck implements ScanCheck {
-
-    private static final Duration REQUEST_TIMEOUT = Duration.ofSeconds(5);
 
     private final HttpClient httpClient;
 
@@ -44,7 +41,7 @@ public class HttpsCheck implements ScanCheck {
 
     private CheckResult checkHttpsReachable(URI uri) {
         try {
-            send(uri);
+            ScannerSupport.get(httpClient, uri);
             return new CheckResult(getName(), Severity.INFO,
                     "Website is served over HTTPS.",
                     "No action needed.");
@@ -57,7 +54,7 @@ public class HttpsCheck implements ScanCheck {
 
     private CheckResult checkHttpRedirectsToHttps(URI uri) {
         try {
-            HttpResponse<Void> response = send(uri);
+            HttpResponse<Void> response = ScannerSupport.get(httpClient, uri);
             int status = response.statusCode();
             String location = response.headers().firstValue("Location").orElse("");
 
@@ -75,13 +72,5 @@ public class HttpsCheck implements ScanCheck {
                     "Could not verify HTTPS redirect behavior: " + e.getMessage(),
                     "Confirm the site is reachable and re-run the scan.");
         }
-    }
-
-    private HttpResponse<Void> send(URI uri) throws Exception {
-        HttpRequest request = HttpRequest.newBuilder(uri)
-                .timeout(REQUEST_TIMEOUT)
-                .GET()
-                .build();
-        return httpClient.send(request, HttpResponse.BodyHandlers.discarding());
     }
 }
