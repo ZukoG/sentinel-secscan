@@ -51,3 +51,87 @@ jobs:
 
       - name: Run tests
         run: ./mvnw -B test
+
+  # SAST. Free for this repo since it's public (would need GitHub Advanced
+  # Security to run this on a private repo). Findings show up in the
+  # Security tab, not as a failed check, there's no baseline/triage done
+  # yet on this codebase, hard-failing CI on day one of scanning would
+  # make every future PR red for reasons unrelated to what it changed.
+  codeql:
+    name: CodeQL
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v4
+        with:
+          languages: java
+          # Explicit since the Build step below does a manual mvnw
+          # compile, not CodeQL's autobuild. Left undefined, CodeQL falls
+          # back to guessing this at analysis time instead of being told.
+          build-mode: manual
+
+      # Manual build (not autobuild), same command as the Build and Test
+      # job, so CodeQL analyzes exactly what actually gets shipped.
+      - name: Build
+        run: ./mvnw -B compile
+
+      - name: Perform CodeQL analysis
+        uses: github/codeql-action/analyze@v4
+
+  # Dependency vulnerability scanning. Trivy instead of OWASP
+  # Dependency-Check (named in the original day-by-day plan): Dependency-
+  # Check needs a free NVD API key to run at a usable speed, unmetered
+  # it's severely rate-limited. Trivy needs no account or API key and is
+  # just as legitimate a DevSecOps tool. Scans the built Spring Boot fat
+  # jar rather than a bare pom.xml, so transitive dependencies bundled
+  # under BOOT-INF/lib are actually visible to the scanner, not just the
+  # directly declared ones.
+  dependency-scan:
+    name: Dependency Vulnerability Scan
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+
+      - name: Build
+        run: ./mvnw -B package -DskipTests
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: fs
+          scan-ref: target
+          scanners: vuln
+          format: sarif
+          output: trivy-results.sarif
+          severity: CRITICAL,HIGH
+
+      - name: Upload Trivy results to the Security tab
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: trivy-results.sarif
