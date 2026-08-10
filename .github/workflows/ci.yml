@@ -76,9 +76,13 @@ jobs:
           cache: maven
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
+        uses: github/codeql-action/init@v4
         with:
           languages: java
+          # Explicit since the Build step below does a manual mvnw
+          # compile, not CodeQL's autobuild. Left undefined, CodeQL falls
+          # back to guessing this at analysis time instead of being told.
+          build-mode: manual
 
       # Manual build (not autobuild), same command as the Build and Test
       # job, so CodeQL analyzes exactly what actually gets shipped.
@@ -86,7 +90,7 @@ jobs:
         run: ./mvnw -B compile
 
       - name: Perform CodeQL analysis
-        uses: github/codeql-action/analyze@v3
+        uses: github/codeql-action/analyze@v4
 
   # Dependency vulnerability scanning. Trivy instead of OWASP
   # Dependency-Check (named in the original day-by-day plan): Dependency-
@@ -128,6 +132,6 @@ jobs:
           severity: CRITICAL,HIGH
 
       - name: Upload Trivy results to the Security tab
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: trivy-results.sarif
