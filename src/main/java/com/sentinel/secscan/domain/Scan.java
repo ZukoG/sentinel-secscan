@@ -17,9 +17,10 @@ import java.time.Instant;
 
 /**
  * overallScore and riskRating start null and are filled in by
- * ScoringService once the scan completes (Day 11). riskRating is a plain
- * String for now, not an enum, its values depend on the scoring bands
- * that are still an open question in docs/SRS.md.
+ * ScoringService once the scan completes (Day 12's orchestration). No
+ * schema change was needed to switch riskRating from a plain String to
+ * the RiskRating enum here (Day 11), @Enumerated(STRING) stores the same
+ * kind of text the existing risk_rating VARCHAR column already held.
  */
 @Entity
 @Table(name = "scans")
@@ -40,8 +41,9 @@ public class Scan {
     @Column(name = "overall_score")
     private Integer overallScore;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "risk_rating")
-    private String riskRating;
+    private RiskRating riskRating;
 
     @CreationTimestamp
     @Column(name = "started_at", nullable = false, updatable = false)
@@ -83,11 +85,11 @@ public class Scan {
         this.overallScore = overallScore;
     }
 
-    public String getRiskRating() {
+    public RiskRating getRiskRating() {
         return riskRating;
     }
 
-    public void setRiskRating(String riskRating) {
+    public void setRiskRating(RiskRating riskRating) {
         this.riskRating = riskRating;
     }
 
