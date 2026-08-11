@@ -1,7 +1,7 @@
 # Software Requirements Specification: Sentinel
 
-**Status:** Draft (Day 1)
-**Version:** 0.1.0
+**Status:** Draft (updated Day 11)
+**Version:** 0.2.0
 
 ## 1. Introduction
 
@@ -113,9 +113,9 @@ and project status stay traceable to each other.
 - **FR-3.4** A failed or errored check (e.g. target unreachable) is recorded as a finding/status. It must not be allowed to silently abort the whole scan.
 
 ### 3.4 Scoring (Day 11)
-- **FR-4.1** After all checks run, the system computes a single aggregate numeric score from the findings.
-- **FR-4.2** The system maps the score to a risk rating (enum, e.g. Low/Medium/High/Critical, exact bands to be defined when `ScoringService` is implemented).
-- **FR-4.3** Scoring weights are defined in one place (`ScoringService`) so they can be justified and revisited without touching check implementations.
+- **FR-4.1** After all checks run, the system computes a single aggregate numeric score from the findings. Score starts at 100 and is reduced by a fixed deduction per finding based on its severity (`INFO` 0, `LOW` 5, `MEDIUM` 15, `HIGH` 25, `CRITICAL` 40), floored at 0. Weighting is severity based only, not also weighted per check: each check already assigns its own severity based on domain knowledge of how bad that specific outcome is, a separate per-check multiplier on top would need its own justification not currently available.
+- **FR-4.2** The system maps the score to a `RiskRating` enum via fixed bands: 90 to 100 `LOW`, 70 to 89 `MEDIUM`, 40 to 69 `HIGH`, 0 to 39 `CRITICAL`.
+- **FR-4.3** Scoring weights and bands are defined in one place (`ScoringService`) so they can be justified and revisited without touching check implementations. The specific numbers above are a first-pass calibration, not derived from an external standard, and may be tuned later with real-world data.
 
 ### 3.5 Scan Orchestration & History (Day 12, Day 14)
 - **FR-5.1** A user can trigger a scan for a website they own. The scan runs asynchronously enough that the triggering request isn't blocked indefinitely (exact execution model decided at Day 12).
@@ -153,5 +153,8 @@ shouldn't grow fields this document doesn't justify.
 
 ## 7. Open Questions
 
-- Exact scoring weights per check and score to risk-rating band boundaries (deferred to Day 11 `ScoringService` design).
 - Scan execution model: synchronous request-scoped vs. background job (deferred to Day 12).
+
+## 8. Resolved Questions
+
+- Exact scoring weights per check and score to risk-rating band boundaries: resolved Day 11, see FR-4.1/FR-4.2 above and `ScoringService`. A known limitation carried forward rather than solved here: a check that couldn't complete (e.g. a "could not verify" `MEDIUM` fallback) currently scores the same as a genuine `MEDIUM` misconfiguration. Distinguishing "inconclusive" from "confirmed issue" would need a new field on the check result type and changes to every existing check, out of scope for Day 11.
