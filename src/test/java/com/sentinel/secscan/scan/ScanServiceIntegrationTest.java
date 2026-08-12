@@ -19,6 +19,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import java.net.InetSocketAddress;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -71,7 +72,13 @@ class ScanServiceIntegrationTest {
         });
         server.start();
 
-        User owner = userRepository.save(new User("scan-it@example.com", "hash", Role.USER));
+        // A fixed email would collide on a re-run against the same
+        // database (caught by actually running the full suite twice,
+        // not just this test in isolation): the standalone run leaves
+        // the row behind, so the next full-suite run hits the unique
+        // constraint. A random email per run avoids that regardless of
+        // what's already in the database.
+        User owner = userRepository.save(new User("scan-it-" + UUID.randomUUID() + "@example.com", "hash", Role.USER));
         Website website = websiteRepository.save(
                 new Website(owner, "http://localhost:" + server.getAddress().getPort()));
 
