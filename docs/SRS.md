@@ -1,7 +1,7 @@
 # Software Requirements Specification: Sentinel
 
-**Status:** Draft (updated Day 11)
-**Version:** 0.2.0
+**Status:** Draft (updated Day 12)
+**Version:** 0.3.0
 
 ## 1. Introduction
 
@@ -118,7 +118,7 @@ and project status stay traceable to each other.
 - **FR-4.3** Scoring weights and bands are defined in one place (`ScoringService`) so they can be justified and revisited without touching check implementations. The specific numbers above are a first-pass calibration, not derived from an external standard, and may be tuned later with real-world data.
 
 ### 3.5 Scan Orchestration & History (Day 12, Day 14)
-- **FR-5.1** A user can trigger a scan for a website they own. The scan runs asynchronously enough that the triggering request isn't blocked indefinitely (exact execution model decided at Day 12).
+- **FR-5.1** A user can trigger a scan for a website they own. The triggering request returns immediately once the scan is created (status `IN_PROGRESS`); the scan itself runs asynchronously on a dedicated thread pool (`ScanRunner`, `@Async`), not on the request thread. A worst case scan (six checks, some with their own timeouts) can take 20-30+ seconds, too long to hold an HTTP request open safely.
 - **FR-5.2** A scan has a status (e.g. `IN_PROGRESS`, `COMPLETED`, `FAILED`) that a user can poll or view.
 - **FR-5.3** A user can view the full history of scans for a website and see score trend over time.
 
@@ -153,8 +153,9 @@ shouldn't grow fields this document doesn't justify.
 
 ## 7. Open Questions
 
-- Scan execution model: synchronous request-scoped vs. background job (deferred to Day 12).
+None currently open. Both questions originally listed here are resolved, see section 8.
 
 ## 8. Resolved Questions
 
 - Exact scoring weights per check and score to risk-rating band boundaries: resolved Day 11, see FR-4.1/FR-4.2 above and `ScoringService`. A known limitation carried forward rather than solved here: a check that couldn't complete (e.g. a "could not verify" `MEDIUM` fallback) currently scores the same as a genuine `MEDIUM` misconfiguration. Distinguishing "inconclusive" from "confirmed issue" would need a new field on the check result type and changes to every existing check, out of scope for Day 11.
+- Scan execution model: resolved Day 12, asynchronous (background thread pool), not synchronous request-scoped, see FR-5.1 above and `ScanRunner`. Chosen because a worst case scan can take 20-30+ seconds, too long to hold an HTTP request open safely.
