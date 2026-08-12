@@ -47,6 +47,13 @@ public class WebsiteService {
         return WebsiteResponse.from(findOwned(owner, websiteId));
     }
 
+    // Added Day 12: ScanService needs the real Website entity (to run
+    // checks against and attach a new Scan to), not the response DTO.
+    // Reuses the same ownership-scoped lookup as every other method here.
+    public Website getEntityForOwner(User owner, Long websiteId) {
+        return findOwned(owner, websiteId);
+    }
+
     public void deleteForOwner(User owner, Long websiteId) {
         websiteRepository.delete(findOwned(owner, websiteId));
     }
