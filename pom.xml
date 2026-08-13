@@ -83,6 +83,16 @@
             <scope>runtime</scope>
         </dependency>
 
+        <!-- Pure Java, Apache 2.0 licensed PDF generation, no native
+             dependencies. Chosen over iText (AGPL or commercial licensing
+             for iText 7+) for a permissive license that actually fits a
+             student project. -->
+        <dependency>
+            <groupId>org.apache.pdfbox</groupId>
+            <artifactId>pdfbox</artifactId>
+            <version>3.0.3</version>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa-test</artifactId>
