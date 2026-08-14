@@ -4,6 +4,7 @@ import com.sentinel.secscan.domain.User;
 import com.sentinel.secscan.report.ReportService;
 import com.sentinel.secscan.scan.dto.ScanResponse;
 import com.sentinel.secscan.scan.dto.ScanSummaryResponse;
+import com.sentinel.secscan.scan.dto.TrendResponse;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -51,6 +52,13 @@ public class ScanController {
             @AuthenticationPrincipal User currentUser,
             @PathVariable Long websiteId) {
         return scanHistoryService.getHistory(currentUser, websiteId);
+    }
+
+    @GetMapping("/api/websites/{websiteId}/scans/trend")
+    public TrendResponse getTrend(
+            @AuthenticationPrincipal User currentUser,
+            @PathVariable Long websiteId) {
+        return scanHistoryService.getTrend(currentUser, websiteId);
     }
 
     @GetMapping("/api/scans/{id}")
