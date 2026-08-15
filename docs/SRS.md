@@ -35,7 +35,7 @@ Sentinel is built as a joint submission for two university electives:
 - **Passive assessment**: inspection of a target's *observable, already-exposed* configuration (response headers, cert metadata, cookie flags, redirect chains). No requests are sent that a normal browser visit wouldn't also send. No fuzzing, brute forcing, injection, or exploitation of any kind.
 
 ### 1.4 References
-- `docs/THREAT_MODEL.md` (Day 15, not yet written)
+- `docs/THREAT_MODEL.md` (Day 15, STRIDE analysis)
 - `docs/CLOUD_ARCHITECTURE.md` (Day 19, not yet written)
 - Project wiki, Architecture page: component, class, sequence, and data model diagrams
 - Project wiki, Build Plan page, and the GitHub Issues/Milestones boards: day-by-day build plan and tracking
