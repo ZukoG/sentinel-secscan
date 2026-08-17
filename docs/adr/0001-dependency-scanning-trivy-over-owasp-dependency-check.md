@@ -18,8 +18,9 @@ NVD load). A usable setup needs a free NVD API key, requested by
 registering an account at https://nvd.nist.gov/developers/request-an-api-key,
 then stored as a GitHub Actions repository secret.
 
-Registering that account has to be a decision (and an action) for
-whoever owns this repository, not something done on their behalf.
+Registering that account is a manual, standalone step outside this
+repository (an NVD account plus a stored GitHub Actions secret), not
+something CI setup alone can complete.
 
 ## Decision
 Use [Trivy](https://github.com/aquasecurity/trivy) instead, via
@@ -40,10 +41,9 @@ revisit once there's a real finding to weigh it against.
 ## Alternatives considered
 - **OWASP Dependency-Check.** Matches the plan's literal wording and is a
   legitimate, widely used tool. Rejected only for the practical reason
-  above: it needs an account this assistant cannot create on the
-  project owner's behalf, and running without one defeats the point of
-  having it in CI at all. Revisiting this later is entirely reasonable,
-  see below.
+  above: it needs a registered NVD API key to run at a usable speed, and
+  running without one defeats the point of having it in CI at all.
+  Revisiting this later is entirely reasonable, see below.
 - **GitHub Dependabot** (native alerts, `.github/dependabot.yml`).
   Free, zero CI runtime cost, and arguably the most "GitHub-native" fit.
   Not chosen for this ADR because it's a repository-level feature rather
