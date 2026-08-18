@@ -93,6 +93,17 @@
             <version>3.0.3</version>
         </dependency>
 
+        <!-- Day 17: generates the OpenAPI 3 spec and serves Swagger UI
+             straight from the existing controllers/DTOs at runtime, no
+             hand-maintained YAML spec to drift out of sync with the real
+             API. Version picked as the current release for Spring Boot
+             4.x/Spring Framework 7.x (springdoc 2.x targets Boot 3.x). -->
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>3.1.0</version>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa-test</artifactId>
