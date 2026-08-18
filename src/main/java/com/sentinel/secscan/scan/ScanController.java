@@ -5,6 +5,11 @@ import com.sentinel.secscan.report.ReportService;
 import com.sentinel.secscan.scan.dto.ScanResponse;
 import com.sentinel.secscan.scan.dto.ScanSummaryResponse;
 import com.sentinel.secscan.scan.dto.TrendResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -26,7 +31,11 @@ import java.util.List;
  * endpoints (Day 14) live here too rather than in their own controllers,
  * all scan-resource-scoped, matching the plan's own file lists (no
  * separate ReportController or ScanHistoryController).
+ *
+ * Day 17: @Tag/@Operation/@ApiResponse added for the generated OpenAPI
+ * spec. No behavior change, annotation only.
  */
+@Tag(name = "Scans", description = "Trigger scans, poll their status and findings, view history/trend, and download a PDF report.")
 @RestController
 public class ScanController {
 
@@ -40,6 +49,7 @@ public class ScanController {
         this.scanHistoryService = scanHistoryService;
     }
 
+    @Operation(summary = "Trigger a scan", description = "Returns immediately with status IN_PROGRESS; scanning runs asynchronously (FR-5.1). Poll GET /api/scans/{id} for completion.")
     @PostMapping("/api/websites/{websiteId}/scans")
     public ResponseEntity<ScanResponse> startScan(
             @AuthenticationPrincipal User currentUser,
@@ -47,6 +57,7 @@ public class ScanController {
         return ResponseEntity.status(HttpStatus.CREATED).body(scanService.startScan(currentUser, websiteId));
     }
 
+    @Operation(summary = "List a website's scan history", description = "Most recent first, every status included.")
     @GetMapping("/api/websites/{websiteId}/scans")
     public List<ScanSummaryResponse> getHistory(
             @AuthenticationPrincipal User currentUser,
@@ -54,6 +65,7 @@ public class ScanController {
         return scanHistoryService.getHistory(currentUser, websiteId);
     }
 
+    @Operation(summary = "Get the score trend for a website", description = "Chronological, completed scans only, plus a delta/direction comparing the two most recent.")
     @GetMapping("/api/websites/{websiteId}/scans/trend")
     public TrendResponse getTrend(
             @AuthenticationPrincipal User currentUser,
@@ -61,11 +73,14 @@ public class ScanController {
         return scanHistoryService.getTrend(currentUser, websiteId);
     }
 
+    @Operation(summary = "Get one scan, including findings", description = "404 if it doesn't exist or belongs to another user.")
     @GetMapping("/api/scans/{id}")
     public ScanResponse getScan(@AuthenticationPrincipal User currentUser, @PathVariable Long id) {
         return scanService.getForOwner(currentUser, id);
     }
 
+    @Operation(summary = "Download a scan's PDF report", description = "409 if the scan isn't COMPLETED yet.")
+    @ApiResponse(responseCode = "200", description = "PDF report", content = @Content(mediaType = MediaType.APPLICATION_PDF_VALUE, schema = @Schema(type = "string", format = "binary")))
     @GetMapping("/api/scans/{id}/report")
     public ResponseEntity<byte[]> getReport(@AuthenticationPrincipal User currentUser, @PathVariable Long id) {
         byte[] pdf = reportService.generateReport(currentUser, id);
