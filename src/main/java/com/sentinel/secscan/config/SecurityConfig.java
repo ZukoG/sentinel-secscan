@@ -46,6 +46,13 @@ public class SecurityConfig {
                         // entry point below, since the forwarded request has
                         // no authenticated principal either.
                         .requestMatchers("/error").permitAll()
+                        // Day 17: the generated OpenAPI spec and Swagger UI
+                        // only describe the API's shape (paths, DTOs,
+                        // status codes), they don't expose any user data,
+                        // so there's no reason to gate them behind a JWT.
+                        // Every actual endpoint they document still enforces
+                        // its own auth per the rules above.
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .anyRequest().authenticated())
                 // Without this, an unauthenticated request to a protected
                 // endpoint falls back to Spring Security's default 403
