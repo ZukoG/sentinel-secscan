@@ -1,0 +1,20 @@
+# Day 18: internal ClusterIP service in front of the sentinel-app
+# Deployment. Deliberately no Ingress/LoadBalancer here, external
+# exposure and TLS termination is real, unfinished work (see finding
+# T-1 in docs/THREAT_MODEL.md: no TLS termination exists anywhere yet),
+# better scoped to its own day than bolted on here just to have
+# something externally reachable.
+apiVersion: v1
+kind: Service
+metadata:
+  name: sentinel-app
+  labels:
+    app: sentinel
+spec:
+  type: ClusterIP
+  selector:
+    app: sentinel
+  ports:
+    - port: 80
+      targetPort: 8080
+      protocol: TCP
