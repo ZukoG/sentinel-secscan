@@ -36,7 +36,9 @@ Sentinel is built as a joint submission for two university electives:
 
 ### 1.4 References
 - `docs/THREAT_MODEL.md` (Day 15, STRIDE analysis)
-- `docs/CLOUD_ARCHITECTURE.md` (Day 19, not yet written)
+- `docs/CLOUD_ARCHITECTURE.md` (Day 19, target cloud architecture and current deployment status)
+- `docs/DEPLOYMENT.md` (Day 19, deployment steps for both local and target cloud modes)
+- `docs/MONITORING.md` (Day 19, monitoring plan)
 - Project wiki, Architecture page: component, class, sequence, and data model diagrams
 - Project wiki, Build Plan page, and the GitHub Issues/Milestones boards: day-by-day build plan and tracking
 
